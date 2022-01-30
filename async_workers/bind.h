@@ -5,7 +5,7 @@
 
 class BindAsyncWorker : public Napi::AsyncWorker {
 public:
-  BindAsyncWorker(Napi::Env &env, LDAP *ld, int msgid, Napi::Promise::Deferred deferred);
+  BindAsyncWorker(Napi::Env &env, LDAP *ld, std::string dn, std::string password, Napi::Promise::Deferred deferred);
   ~BindAsyncWorker();
   void Execute();
   void OnOK();
@@ -13,6 +13,7 @@ public:
 
 private:
   LDAP *ld;
-  int msgid;
+  std::string dn;
+  std::string password;
   Napi::Promise::Deferred deferred;
 };

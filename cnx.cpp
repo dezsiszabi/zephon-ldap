@@ -41,9 +41,9 @@ LDAPCnx::LDAPCnx(const Napi::CallbackInfo& info) : Napi::ObjectWrap<LDAPCnx>(inf
   int ver = LDAP_VERSION3;
   
   Napi::Env env = info.Env();
-  std::string url = info[0].As<Napi::String>();
+  std::string arg_url = info[0].As<Napi::String>();
 
-  if (ldap_initialize(&(this->ld), url.c_str()) != LDAP_SUCCESS) {
+  if (ldap_initialize(&(this->ld), arg_url.c_str()) != LDAP_SUCCESS) {
     throw Napi::Error::New(env, "Error intializing ldap");
   }
 
@@ -85,13 +85,11 @@ Napi::Value LDAPCnx::Search(const Napi::CallbackInfo& info) {
 Napi::Value LDAPCnx::Bind(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
-  std::string dn = info[0].As<Napi::String>();
-  std::string password = info[1].As<Napi::String>();
-
-  int msgid = ldap_simple_bind(this->ld, dn.c_str(), password.c_str());
+  std::string arg_dn = info[0].As<Napi::String>();
+  std::string arg_password = info[1].As<Napi::String>();
 
   Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
-  BindAsyncWorker* bindAsyncWorker = new BindAsyncWorker(env, this->ld, msgid, deferred);
+  BindAsyncWorker *bindAsyncWorker = new BindAsyncWorker(env, this->ld, arg_dn, arg_password, deferred);
   bindAsyncWorker->Queue();
   return deferred.Promise();
 }
