@@ -22,6 +22,9 @@ void SearchAsyncWorker::Execute()
   rc = ldap_result(this->ld, this->msgid, LDAP_MSG_ALL, &zerotime, &res);
   switch (rc)
   {
+  case -1:
+    SetError("Error during ldap search");
+    break;
   case LDAP_RES_SEARCH_ENTRY:
   case LDAP_RES_SEARCH_RESULT:
     for (entry = ldap_first_entry(this->ld, res), i = 0; entry; entry = ldap_next_entry(this->ld, entry), i++)
