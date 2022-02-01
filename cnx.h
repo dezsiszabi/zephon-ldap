@@ -16,14 +16,16 @@ struct ldap_cnx
   napi_env env;
 };
 
-class LDAPCnx : public Napi::ObjectWrap<LDAPCnx> {
-  public:
-    static Napi::Object Init(Napi::Env env, Napi::Object exports);
-    LDAPCnx(const Napi::CallbackInfo& info);
+class LDAPCnx : public Napi::ObjectWrap<LDAPCnx>
+{
+public:
+  static Napi::Object Init(Napi::Env env, Napi::Object exports);
+  LDAPCnx(const Napi::CallbackInfo &info);
 
-  private:
-    LDAP *ld;
-    Napi::Value Search(const Napi::CallbackInfo& info);
-    Napi::Value Bind(const Napi::CallbackInfo& info);
-    Napi::Value Close(const Napi::CallbackInfo& info);
+private:
+  LDAP *ld;
+  Napi::Value Search(const Napi::CallbackInfo &info);
+  Napi::Value Bind(const Napi::CallbackInfo &info);
+  Napi::Value Close(const Napi::CallbackInfo &info);
+  Napi::Value SaslBind(const Napi::CallbackInfo &info);
 };

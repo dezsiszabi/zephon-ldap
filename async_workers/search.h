@@ -4,7 +4,8 @@
 #include <napi.h>
 #include <ldap.h>
 
-class SearchAsyncWorker : public Napi::AsyncWorker {
+class SearchAsyncWorker : public Napi::AsyncWorker
+{
 public:
   SearchAsyncWorker(Napi::Env &env, LDAP *ld, int msgid, Napi::Promise::Deferred deferred);
   ~SearchAsyncWorker();

@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "/usr/include/node"
             ],
-            "defines": ["LDAP_DEPRECATED"],
+            "defines": ["LDAP_DEPRECATED", "HAVE_CYRUS_SASL"],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",

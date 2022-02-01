@@ -3,7 +3,8 @@
 
 using namespace Napi;
 
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
+Napi::Object Init(Napi::Env env, Napi::Object exports)
+{
     LDAPCnx::Init(env, exports);
     return exports;
 }

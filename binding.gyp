@@ -1,4 +1,7 @@
 {
+  'variables': {
+    'SASL': '<!(test -f /usr/include/sasl/sasl.h && echo y || echo n)'
+  },
   'targets': [
     {
       'target_name': 'zephon_ldap',
@@ -6,7 +9,8 @@
         './main.cpp',
         './cnx.cpp',
         './async_workers/search.cpp',
-        './async_workers/bind.cpp'
+        './async_workers/bind.cpp',
+        './async_workers/saslbind.cpp'
       ],
       'dependencies': [
         '<!(node -p "require(\'node-addon-api\').gyp")'
@@ -29,6 +33,16 @@
       ],
       'libraries': [
         '-lldap'
+      ],
+      'conditions': [
+        [
+          'SASL==\"y\"',
+          {
+            'defines': [
+              'HAVE_CYRUS_SASL'
+            ]
+          }
+        ]
       ]
     }
   ]
