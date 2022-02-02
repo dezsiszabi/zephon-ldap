@@ -2,8 +2,8 @@
 
 using namespace Napi;
 
-SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, std::mutex &mtx, LDAP *ld, int msgid, std::string base, std::string filter, std::vector<std::string> attributes, Napi::Promise::Deferred deferred)
-    : Napi::AsyncWorker(env), mtx(mtx), ld(ld), msgid(msgid), base(base), filter(filter), attributes(attributes), deferred(deferred) {}
+SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, std::mutex &mtx, LDAP *ld, std::string base, std::string filter, std::vector<std::string> attributes, Napi::Promise::Deferred deferred)
+    : Napi::AsyncWorker(env), mtx(mtx), ld(ld), base(base), filter(filter), attributes(attributes), deferred(deferred) {}
 
 SearchAsyncWorker::~SearchAsyncWorker() {}
 
@@ -18,6 +18,7 @@ void SearchAsyncWorker::Execute()
   char *dn, *attrname;
   struct berval **vals;
   int num_vals;
+  int msgid;
 
   int i, j, rc;
   struct timeval zerotime = {-1, 0};
@@ -34,7 +35,7 @@ void SearchAsyncWorker::Execute()
     return;
   }
 
-  rc = ldap_result(this->ld, this->msgid, LDAP_MSG_ALL, &zerotime, &res);
+  rc = ldap_result(this->ld, msgid, LDAP_MSG_ALL, &zerotime, &res);
   switch (rc)
   {
   case -1:

@@ -45,7 +45,6 @@ LDAPCnx::LDAPCnx(const Napi::CallbackInfo &info) : Napi::ObjectWrap<LDAPCnx>(inf
 
 Napi::Value LDAPCnx::Search(const Napi::CallbackInfo &info)
 {
-  int msgid = 0;
   LDAPControl *page_control[2];
 
   Napi::Env env = info.Env();
@@ -68,13 +67,7 @@ Napi::Value LDAPCnx::Search(const Napi::CallbackInfo &info)
 
   memset(&page_control, 0, sizeof(page_control));
 
-  if (ldap_search_ext(this->ld, arg_base.c_str(), 2, arg_filter.c_str(), (char **)attrs.data(), 0, page_control, NULL, NULL, 0, &msgid) != LDAP_SUCCESS)
-  {
-    deferred.Reject(Napi::Error::New(env, "Error searching ldap").Value());
-    return deferred.Promise();
-  }
-
-  SearchAsyncWorker *searchAsyncWorker = new SearchAsyncWorker(env, this->mtx, this->ld, msgid, arg_base, arg_filter, attributes, deferred);
+  SearchAsyncWorker *searchAsyncWorker = new SearchAsyncWorker(env, this->mtx, this->ld, arg_base, arg_filter, attributes, deferred);
   searchAsyncWorker->Queue();
   return deferred.Promise();
 }
