@@ -34,14 +34,13 @@ static int sasl_callback(LDAP *ld, unsigned flags, void *defaults, void *sasl_in
 
 SaslBindAsyncWorker::SaslBindAsyncWorker(
     Napi::Env &env,
-    std::mutex &mtx,
     LDAP *ld,
     std::string mechanism,
     std::string *user,
     std::string *password,
     std::string *realm,
     std::string *proxy_user,
-    Napi::Promise::Deferred deferred) : Napi::AsyncWorker(env), mtx(mtx), ld(ld), mechanism(mechanism), user(user), password(password), realm(realm), proxy_user(proxy_user), deferred(deferred)
+    Napi::Promise::Deferred deferred) : Napi::AsyncWorker(env), ld(ld), mechanism(mechanism), user(user), password(password), realm(realm), proxy_user(proxy_user), deferred(deferred)
 {
   this->defaults.user = user == NULL ? NULL : user->c_str();
   this->defaults.password = password == NULL ? NULL : password->c_str();
@@ -58,8 +57,6 @@ SaslBindAsyncWorker::~SaslBindAsyncWorker() {
 
 void SaslBindAsyncWorker::Execute()
 {
-  std::lock_guard<std::mutex> guard(this->mtx);
-
   LDAPControl **ctrls = NULL;
   char **refs = NULL;
   char *matched = NULL;

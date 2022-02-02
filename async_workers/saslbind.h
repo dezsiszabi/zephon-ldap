@@ -14,14 +14,13 @@ typedef struct sasl_defaults
 class SaslBindAsyncWorker : public Napi::AsyncWorker
 {
 public:
-  SaslBindAsyncWorker(Napi::Env &env, std::mutex &mtx, LDAP *ld, std::string mechanism, std::string *user, std::string *password, std::string *realm, std::string *proxy_user, Napi::Promise::Deferred deferred);
+  SaslBindAsyncWorker(Napi::Env &env, LDAP *ld, std::string mechanism, std::string *user, std::string *password, std::string *realm, std::string *proxy_user, Napi::Promise::Deferred deferred);
   ~SaslBindAsyncWorker();
   void Execute();
   void OnOK();
   void OnError(Napi::Error const &error);
 
 private:
-  std::mutex &mtx;
   LDAP *ld;
   std::string mechanism;
   std::string *user;

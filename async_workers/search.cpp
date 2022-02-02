@@ -2,15 +2,13 @@
 
 using namespace Napi;
 
-SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, std::mutex &mtx, LDAP *ld, std::string base, std::string filter, std::vector<std::string> attributes, Napi::Promise::Deferred deferred)
-    : Napi::AsyncWorker(env), mtx(mtx), ld(ld), base(base), filter(filter), attributes(attributes), deferred(deferred) {}
+SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, LDAP *ld, std::string base, std::string filter, std::vector<std::string> attributes, Napi::Promise::Deferred deferred)
+    : Napi::AsyncWorker(env), ld(ld), base(base), filter(filter), attributes(attributes), deferred(deferred) {}
 
 SearchAsyncWorker::~SearchAsyncWorker() {}
 
 void SearchAsyncWorker::Execute()
 {
-  std::lock_guard<std::mutex> guard(this->mtx);
-
   LDAPControl *page_control[2];
   LDAPMessage *res;
   BerElement *ber;

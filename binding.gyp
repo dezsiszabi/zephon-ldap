@@ -32,7 +32,7 @@
         '-fexceptions'
       ],
       'libraries': [
-        '-lldap'
+        '-lldap_r'
       ],
       'conditions': [
         [

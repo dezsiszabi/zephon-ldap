@@ -67,7 +67,7 @@ Napi::Value LDAPCnx::Search(const Napi::CallbackInfo &info)
 
   memset(&page_control, 0, sizeof(page_control));
 
-  SearchAsyncWorker *searchAsyncWorker = new SearchAsyncWorker(env, this->mtx, this->ld, arg_base, arg_filter, attributes, deferred);
+  SearchAsyncWorker *searchAsyncWorker = new SearchAsyncWorker(env, this->ld, arg_base, arg_filter, attributes, deferred);
   searchAsyncWorker->Queue();
   return deferred.Promise();
 }
@@ -80,7 +80,7 @@ Napi::Value LDAPCnx::Bind(const Napi::CallbackInfo &info)
   std::string arg_password = info[1].As<Napi::String>();
 
   Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
-  BindAsyncWorker *bindAsyncWorker = new BindAsyncWorker(env, this->mtx, this->ld, arg_dn, arg_password, deferred);
+  BindAsyncWorker *bindAsyncWorker = new BindAsyncWorker(env, this->ld, arg_dn, arg_password, deferred);
   bindAsyncWorker->Queue();
   return deferred.Promise();
 }
@@ -115,7 +115,7 @@ Napi::Value LDAPCnx::SaslBind(const Napi::CallbackInfo &info)
     if (!proxy_user_value.IsUndefined()) arg_proxy_user = new std::string(proxy_user_value.As<Napi::String>());
   }
 
-  SaslBindAsyncWorker *saslBindAsyncWorker = new SaslBindAsyncWorker(env, this->mtx, this->ld, arg_mechanism, arg_user, arg_password, arg_realm, arg_proxy_user, deferred);
+  SaslBindAsyncWorker *saslBindAsyncWorker = new SaslBindAsyncWorker(env, this->ld, arg_mechanism, arg_user, arg_password, arg_realm, arg_proxy_user, deferred);
   saslBindAsyncWorker->Queue();
   
 #else
