@@ -2,13 +2,16 @@
 
 using namespace Napi;
 
-SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, LDAP *ld, int msgid, Napi::Promise::Deferred deferred)
-    : Napi::AsyncWorker(env), ld(ld), msgid(msgid), deferred(deferred) {}
+SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, std::mutex &mtx, LDAP *ld, int msgid, std::string base, std::string filter, std::vector<std::string> attributes, Napi::Promise::Deferred deferred)
+    : Napi::AsyncWorker(env), mtx(mtx), ld(ld), msgid(msgid), base(base), filter(filter), attributes(attributes), deferred(deferred) {}
 
 SearchAsyncWorker::~SearchAsyncWorker() {}
 
 void SearchAsyncWorker::Execute()
 {
+  std::lock_guard<std::mutex> guard(this->mtx);
+
+  LDAPControl *page_control[2];
   LDAPMessage *res;
   BerElement *ber;
   LDAPMessage *entry;
@@ -19,11 +22,23 @@ void SearchAsyncWorker::Execute()
   int i, j, rc;
   struct timeval zerotime = {-1, 0};
 
+  std::vector<const char *> attrs;
+  std::transform(std::begin(this->attributes), std::end(this->attributes), std::back_inserter(attrs), std::mem_fn(&std::string::c_str));
+  attrs.push_back(NULL);
+
+  memset(&page_control, 0, sizeof(page_control));
+
+  if (ldap_search_ext(this->ld, this->base.c_str(), 2, this->filter.c_str(), (char **)attrs.data(), 0, page_control, NULL, NULL, 0, &msgid) != LDAP_SUCCESS)
+  {
+    SetError("Error searching ldap");
+    return;
+  }
+
   rc = ldap_result(this->ld, this->msgid, LDAP_MSG_ALL, &zerotime, &res);
   switch (rc)
   {
   case -1:
-    SetError("Error during ldap search");
+    SetError("Error searching ldap");
     break;
   case LDAP_RES_SEARCH_ENTRY:
   case LDAP_RES_SEARCH_RESULT:

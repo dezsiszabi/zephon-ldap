@@ -23,6 +23,7 @@ public:
   LDAPCnx(const Napi::CallbackInfo &info);
 
 private:
+  std::mutex mtx;
   LDAP *ld;
   Napi::Value Search(const Napi::CallbackInfo &info);
   Napi::Value Bind(const Napi::CallbackInfo &info);

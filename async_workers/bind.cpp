@@ -2,13 +2,15 @@
 
 using namespace Napi;
 
-BindAsyncWorker::BindAsyncWorker(Napi::Env &env, LDAP *ld, std::string dn, std::string password, Napi::Promise::Deferred deferred)
-    : Napi::AsyncWorker(env), ld(ld), dn(dn), password(password), deferred(deferred) {}
+BindAsyncWorker::BindAsyncWorker(Napi::Env &env, std::mutex &mtx, LDAP *ld, std::string dn, std::string password, Napi::Promise::Deferred deferred)
+    : Napi::AsyncWorker(env), mtx(mtx), ld(ld), dn(dn), password(password), deferred(deferred) {}
 
 BindAsyncWorker::~BindAsyncWorker() {}
 
 void BindAsyncWorker::Execute()
 {
+  std::lock_guard<std::mutex> guard(this->mtx);
+
   LDAPMessage *res;
   struct timeval zerotime = {-1, 0};
 
