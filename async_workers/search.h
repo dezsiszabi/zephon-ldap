@@ -7,7 +7,7 @@
 class SearchAsyncWorker : public Napi::AsyncWorker
 {
 public:
-  SearchAsyncWorker(Napi::Env &env, LDAP *ld, std::string base, std::string filter, std::vector<std::string> attributes, Napi::Promise::Deferred deferred);
+  SearchAsyncWorker(Napi::Env &env, LDAP *ld, std::string base, std::string filter, std::vector<std::string> attributes, std::vector<std::string> binary_attributes, Napi::Promise::Deferred deferred);
   ~SearchAsyncWorker();
   void Execute();
   void OnOK();
@@ -18,6 +18,7 @@ private:
   std::string base;
   std::string filter;
   std::vector<std::string> attributes;
+  std::vector<std::string> binary_attributes;
   std::vector<std::map<std::string, std::vector<std::string>>> results;
   Napi::Promise::Deferred deferred;
 };

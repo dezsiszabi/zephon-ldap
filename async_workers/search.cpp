@@ -2,8 +2,8 @@
 
 using namespace Napi;
 
-SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, LDAP *ld, std::string base, std::string filter, std::vector<std::string> attributes, Napi::Promise::Deferred deferred)
-    : Napi::AsyncWorker(env), ld(ld), base(base), filter(filter), attributes(attributes), deferred(deferred) {}
+SearchAsyncWorker::SearchAsyncWorker(Napi::Env &env, LDAP *ld, std::string base, std::string filter, std::vector<std::string> attributes, std::vector<std::string> binary_attributes, Napi::Promise::Deferred deferred)
+    : Napi::AsyncWorker(env), ld(ld), base(base), filter(filter), attributes(attributes), binary_attributes(binary_attributes), deferred(deferred) {}
 
 SearchAsyncWorker::~SearchAsyncWorker() {}
 
@@ -55,7 +55,7 @@ void SearchAsyncWorker::Execute()
 
         for (j = 0; j < num_vals; j++)
         {
-          results[i][std::string(attrname)].push_back(std::string(vals[j]->bv_val));
+          results[i][std::string(attrname)].push_back(std::string(vals[j]->bv_val, vals[j]->bv_len));
         }
 
         ldap_value_free_len(vals);
@@ -80,7 +80,16 @@ void SearchAsyncWorker::OnOK()
       Napi::Array attr_array = Napi::Array::New(Env(), attr.second.size());
       for (uint j = 0; j < attr.second.size(); j++)
       {
-        attr_array[j] = Napi::String::New(Env(), attr.second[j]);
+        if (std::find(this->binary_attributes.begin(), this->binary_attributes.end(), attr.first) != this->binary_attributes.end())
+        {
+          auto buffer = Napi::ArrayBuffer::New(Env(), attr.second[j].length());
+          memcpy(buffer.Data(), attr.second[j].c_str(), attr.second[j].length());
+          attr_array[j] = buffer;
+        }
+        else
+        {
+          attr_array[j] = Napi::String::New(Env(), attr.second[j]);
+        }
       }
       obj.Set(attr.first, attr_array);
     }

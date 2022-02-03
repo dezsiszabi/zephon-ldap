@@ -1,11 +1,13 @@
+const fs = require('fs');
+
 const binding = require("bindings")("zephon_ldap.node");
 
-const ldap = new binding.LDAPCnx('ldap://ldap.forumsys.com:389');
+const ldap = new binding.LDAPCnx('ldap://localhost:10389');
 
 (async () => {
-    await ldap.bind('cn=read-only-admin,dc=example,dc=com', 'password');
+    await ldap.bind('cn=admin,dc=planetexpress,dc=com', 'GoodNewsEveryone');
 
-    const results = await ldap.search('dc=example,dc=com', 'objectClass=person', ['*']);
+    const results = await ldap.search('ou=people,dc=planetexpress,dc=com', '(objectClass=inetOrgPerson)', ['*'], ['jpegPhoto']);
 
     console.log(results);
 })();

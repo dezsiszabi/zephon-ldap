@@ -43,6 +43,19 @@ LDAPCnx::LDAPCnx(const Napi::CallbackInfo &info) : Napi::ObjectWrap<LDAPCnx>(inf
   ldap_set_option(this->ld, LDAP_OPT_PROTOCOL_VERSION, &ver);
 }
 
+std::vector<std::string> LDAPCnx::GetStringVectorFromNapiArray(Napi::Array array)
+{
+  std::vector<std::string> vect;
+
+  for (uint i = 0; i < array.Length(); i++)
+  {
+    std::string elem = ((Napi::Value)array[i]).As<Napi::String>();
+    vect.push_back(elem);
+  }
+
+  return vect;
+}
+
 Napi::Value LDAPCnx::Search(const Napi::CallbackInfo &info)
 {
   LDAPControl *page_control[2];
@@ -52,22 +65,14 @@ Napi::Value LDAPCnx::Search(const Napi::CallbackInfo &info)
   std::string arg_base = info[0].As<Napi::String>();
   std::string arg_filter = info[1].As<Napi::String>();
   Napi::Array arg_attrs = info[2].As<Napi::Array>();
+  Napi::Array arg_binary_attrs = info[3].As<Napi::Array>();
 
-  std::vector<std::string> attributes;
-
-  for (uint i = 0; i < arg_attrs.Length(); i++)
-  {
-    std::string attr = ((Napi::Value)arg_attrs[i]).As<Napi::String>();
-    attributes.push_back(attr);
-  }
-
-  std::vector<const char *> attrs;
-  std::transform(std::begin(attributes), std::end(attributes), std::back_inserter(attrs), std::mem_fn(&std::string::c_str));
-  attrs.push_back(NULL);
+  std::vector<std::string> attributes = this->GetStringVectorFromNapiArray(arg_attrs);
+  std::vector<std::string> binary_attributes = this->GetStringVectorFromNapiArray(arg_binary_attrs);
 
   memset(&page_control, 0, sizeof(page_control));
 
-  SearchAsyncWorker *searchAsyncWorker = new SearchAsyncWorker(env, this->ld, arg_base, arg_filter, attributes, deferred);
+  SearchAsyncWorker *searchAsyncWorker = new SearchAsyncWorker(env, this->ld, arg_base, arg_filter, attributes, binary_attributes, deferred);
   searchAsyncWorker->Queue();
   return deferred.Promise();
 }

@@ -16,4 +16,6 @@ private:
   Napi::Value Bind(const Napi::CallbackInfo &info);
   Napi::Value Close(const Napi::CallbackInfo &info);
   Napi::Value SaslBind(const Napi::CallbackInfo &info);
+
+  std::vector<std::string> GetStringVectorFromNapiArray(Napi::Array array);
 };
