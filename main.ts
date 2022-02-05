@@ -24,7 +24,7 @@ export class LDAP {
         return this.cnx.saslbind(mechanism, options);
     }
 
-    public search<TBinaryAttribute extends string>(base: string, filter: string, attributes: string[], binaryAttributes: TBinaryAttribute[] = []): Promise<LDAPSearchResult<TBinaryAttribute>[]> {
+    public search<TBinaryAttribute extends string>(base: string, filter: string, attributes: string[] = ['*'], binaryAttributes: TBinaryAttribute[] = []): Promise<LDAPSearchResult<TBinaryAttribute>[]> {
         return this.cnx.search(base, filter, attributes, binaryAttributes);
     }
 }
