@@ -10,7 +10,7 @@
             "name": "Debug",
             "preLaunchTask": "npm: build",
             "program": "/usr/bin/node",
-            "args": ["${workspaceFolder}/test/testy-test.js"],
+            "args": ["${workspaceFolder}/test/tests.js"],
             "cwd": "${workspaceFolder}"
         }
     ]

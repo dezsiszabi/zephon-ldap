@@ -7,24 +7,55 @@ export interface LDAPSaslBindOptions {
     proxy_user: string;
 }
 
+export interface LdapSearchOptions<TBinaryAttribute> {
+    base: string;
+    filter: string;
+    attributes?: string[];
+    binaryAttributes?: TBinaryAttribute[];
+    retryAttempts?: number;
+}
+
 export type LDAPSearchResult<TBinaryAttribute extends string> = ({ [K in TBinaryAttribute]?: ArrayBuffer[]; } & { [attribute: string]: string[]; });
 
 export class LDAP {
-    private readonly cnx;
+    private lastBind;
+    private cnx;
 
-    constructor(url: string) {
-        this.cnx = new binding.LDAPCnx(url);
+    constructor(private url: string) {
+        this.connect();
     }
 
     public bind(dn: string, password: string): Promise<void> {
-        return this.cnx.bind(dn, password);
+        this.lastBind = () => this.cnx.bind(dn, password);
+        return this.lastBind();
     }
 
     public saslbind(mechanism: string, options?: LDAPSaslBindOptions): Promise<void> {
-        return this.cnx.saslbind(mechanism, options);
+        this.lastBind = () => this.saslbind(mechanism, options);
+        return this.lastBind();
     }
 
-    public search<TBinaryAttribute extends string>(base: string, filter: string, attributes: string[] = ['*'], binaryAttributes: TBinaryAttribute[] = []): Promise<LDAPSearchResult<TBinaryAttribute>[]> {
-        return this.cnx.search(base, filter, attributes, binaryAttributes);
+    public async search<TBinaryAttribute extends string>(options: LdapSearchOptions<TBinaryAttribute>): Promise<LDAPSearchResult<TBinaryAttribute>[]> {
+        const retryAttempts = options.retryAttempts ?? 0;
+        try {
+            const results = await this.cnx.search(options.base, options.filter, options.attributes ?? ['*'], options.binaryAttributes ?? []);
+            return results;
+        } catch (error) {
+            if (retryAttempts > 0) {;
+                this.connect();
+                await this.lastBind();
+                return this.search({ ...options, retryAttempts: retryAttempts - 1 });
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    public close(): void {
+        this.cnx.close();
+    }
+
+    private connect(): void {
+        this.cnx = new binding.LDAPCnx(this.url);
     }
 }

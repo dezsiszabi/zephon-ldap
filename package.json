@@ -2,7 +2,6 @@
   "name": "zephon-ldap",
   "version": "1.0.0",
   "main": "main.js",
-  "types": "main.d.ts",
   "description": "OpenLDAP bindings for node",
   "private": false,
   "gypfile": true,
